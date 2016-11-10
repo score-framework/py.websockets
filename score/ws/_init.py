@@ -31,7 +31,7 @@ from .worker import WebsocketWorker
 
 defaults = {
     'serve.ip': '0.0.0.0',
-    'serve.port': 8080,
+    'serve.port': 8081,
     'stop_timeout': None,
 }
 
