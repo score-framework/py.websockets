@@ -24,15 +24,16 @@
 # the discretion of STRG.AT GmbH also the competent court, in whose district the
 # Licensee has his registered seat, an establishment or assets.
 
-import asyncio
-from score.init import ConfiguredModule, ConfigurationError, parse_dotted_path
-from autobahn.asyncio.websocket import WebSocketServerProtocol, \
-    WebSocketServerFactory
+from score.init import (
+    ConfiguredModule, ConfigurationError, parse_dotted_path,
+    parse_time_interval)
+from .worker import WebsocketWorker
 
 
 defaults = {
     'serve.ip': '0.0.0.0',
     'serve.port': 8080,
+    'stop_timeout': None,
 }
 
 
@@ -43,14 +44,16 @@ def init(confdict, db=None):
     """
     conf = dict(defaults.items())
     conf.update(confdict)
-    if 'protocol' not in conf:
+    if 'handler' not in conf:
         import score.ws
-        raise ConfigurationError(score.ws, 'No protocol specified')
-    protocol = parse_dotted_path(conf['protocol'])
-    assert issubclass(protocol, WebSocketServerProtocol)
+        raise ConfigurationError(score.ws, 'No handler specified')
+    handler = parse_dotted_path(conf['handler'])
     host = conf['serve.ip']
     port = int(conf['serve.port'])
-    return ConfiguredWsModule(host, port, protocol)
+    stop_timeout = conf['stop_timeout']
+    if stop_timeout is not None:
+        stop_timeout = parse_time_interval(stop_timeout)
+    return ConfiguredWsModule(host, port, handler, stop_timeout)
 
 
 class ConfiguredWsModule(ConfiguredModule):
@@ -58,53 +61,20 @@ class ConfiguredWsModule(ConfiguredModule):
     This module's :class:`configuration class <score.init.ConfiguredModule>`.
     """
 
-    def __init__(self, host, port, protocol):
+    def __init__(self, host, port, handler, stop_timeout):
+        import score.ws
+        super().__init__(score.ws)
         self.host = host
         self.port = port
-        self.protocol = protocol
+        self.handler = handler
+        self.stop_timeout = stop_timeout
 
     def score_serve_workers(self):
         if not hasattr(self, '_score_serve_workers'):
-            import score.serve
-            conf = self
 
-            class Worker(score.serve.AsyncioWorker):
+            class ConfiguredWebsocketWorker(WebsocketWorker):
+                conf = self
 
-                def __init__(self):
-                    self.server = None
-
-                def create_connection(self, *args, **kwargs):
-                    connection = conf.protocol(*args, **kwargs)
-                    connection.is_closed.add_done_callback(
-                        self.connection_closed)
-                    self.connections.append(connection)
-                    return connection
-
-                def connection_closed(self, future):
-                    self.connections.remove(future.result())
-
-                def _prepare(self):
-                    self.connections = []
-
-                @asyncio.coroutine
-                def _start(self):
-                    url = "ws://%s:%d" % (conf.host, conf.port)
-                    self.factory = WebSocketServerFactory(url, loop=self.loop)
-                    self.factory.protocol = self.create_connection
-                    self.server = yield from self.loop.create_server(
-                        self.factory, conf.host, conf.port)
-
-                @asyncio.coroutine
-                def _pause(self):
-                    self.server.close()
-                    for connection in self.connections:
-                        connection.sendClose(4001, 'pause')  # TODO: MAGIC INT!
-                    while self.connections:
-                        yield from self.connections[0]
-
-                def _cleanup(self, exception):
-                    pass
-
-            self._score_serve_workers = [Worker()]
+            self._score_serve_workers = [ConfiguredWebsocketWorker()]
 
         return self._score_serve_workers

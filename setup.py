@@ -59,5 +59,6 @@ setup(
     ],
     install_requires=[
         'score.init >= 0.3',
+        'websockets >= 3.0',
     ]
 )
