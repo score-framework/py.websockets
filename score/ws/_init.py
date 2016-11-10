@@ -24,9 +24,8 @@
 # the discretion of STRG.AT GmbH also the competent court, in whose district the
 # Licensee has his registered seat, an establishment or assets.
 
-from score.init import (
-    ConfiguredModule, ConfigurationError, parse_dotted_path,
-    parse_time_interval)
+import asyncio
+from score.init import ConfiguredModule, parse_time_interval
 from .worker import WebsocketWorker
 
 
@@ -37,23 +36,19 @@ defaults = {
 }
 
 
-def init(confdict, db=None):
+def init(confdict, ctx):
     """
     Initializes this module acoording to :ref:`our module initialization
     guidelines <module_initialization>` with the following configuration keys:
     """
     conf = dict(defaults.items())
     conf.update(confdict)
-    if 'handler' not in conf:
-        import score.ws
-        raise ConfigurationError(score.ws, 'No handler specified')
-    handler = parse_dotted_path(conf['handler'])
     host = conf['serve.ip']
     port = int(conf['serve.port'])
     stop_timeout = conf['stop_timeout']
     if stop_timeout is not None:
         stop_timeout = parse_time_interval(stop_timeout)
-    return ConfiguredWsModule(host, port, handler, stop_timeout)
+    return ConfiguredWsModule(ctx, host, port, stop_timeout)
 
 
 class ConfiguredWsModule(ConfiguredModule):
@@ -61,20 +56,15 @@ class ConfiguredWsModule(ConfiguredModule):
     This module's :class:`configuration class <score.init.ConfiguredModule>`.
     """
 
-    def __init__(self, host, port, handler, stop_timeout):
+    def __init__(self, ctx, host, port, stop_timeout):
         import score.ws
         super().__init__(score.ws)
+        self.ctx = ctx
         self.host = host
         self.port = port
-        self.handler = handler
         self.stop_timeout = stop_timeout
 
-    def score_serve_workers(self):
-        if not hasattr(self, '_score_serve_workers'):
-
-            class ConfiguredWebsocketWorker(WebsocketWorker):
-                conf = self
-
-            self._score_serve_workers = [ConfiguredWebsocketWorker()]
-
-        return self._score_serve_workers
+    def create_worker(self, handler):
+        if not asyncio.iscoroutinefunction(handler):
+            raise ValueError('Handler must be a coroutine function')
+        return WebsocketWorker(self, handler)

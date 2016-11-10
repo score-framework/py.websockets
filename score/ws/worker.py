@@ -6,19 +6,27 @@ import concurrent
 
 class WebsocketWorker(score.serve.AsyncioWorker):
 
+    def __init__(self, conf, handler):
+        self.conf = conf
+        self.handler = handler
+
     @asyncio.coroutine
     def create_connection(self, protocol, uri):
-        coroutine = self.conf.handler(protocol, uri)
-        future = self.loop.create_task(coroutine)
-        self.connections.append(future)
-        try:
-            yield from future
-        except (websockets.ConnectionClosed, concurrent.futures.CancelledError):
-            pass
-        except Exception as e:
-            self.conf.log.exception(e)
-        finally:
-            self.connections.remove(future)
+        with self.conf.ctx.Context() as ctx:
+            ctx.websocket = protocol
+            coroutine = self.handler(ctx)
+            future = self.loop.create_task(coroutine)
+            self.connections.append(future)
+            try:
+                yield from future
+            except websockets.ConnectionClosed:
+                pass
+            except concurrent.futures.CancelledError:
+                pass
+            except Exception as e:
+                self.conf.log.exception(e)
+            finally:
+                self.connections.remove(future)
 
     def _prepare(self):
         self.connections = []
