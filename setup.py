@@ -58,6 +58,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
     install_requires=[
+        'score.ctx',
         'score.init >= 0.3',
         'websockets >= 3.0',
     ]
