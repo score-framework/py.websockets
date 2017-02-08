@@ -35,7 +35,7 @@ class WebsocketWorker(score.serve.AsyncioWorker):
     def _start(self):
         self.server = yield from websockets.serve(
             self.create_connection,
-            self.conf.host, self.conf.port, loop=self.loop)
+            self.conf.host, self.conf.port, loop=self.loop, reuse_port=True)
 
     @asyncio.coroutine
     def _pause(self):
