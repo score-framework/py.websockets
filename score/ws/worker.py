@@ -7,6 +7,8 @@ import concurrent
 class WebsocketWorker(score.serve.AsyncioWorker):
 
     def __init__(self, conf, handler):
+        if not asyncio.iscoroutinefunction(handler):
+            raise ValueError('Handler must be a coroutine function')
         self.conf = conf
         self.handler = handler
 
@@ -35,7 +37,8 @@ class WebsocketWorker(score.serve.AsyncioWorker):
     def _start(self):
         self.server = yield from websockets.serve(
             self.create_connection,
-            self.conf.host, self.conf.port, loop=self.loop, reuse_port=True)
+            self.conf.host, self.conf.port, loop=self.loop,
+            reuse_port=self.conf.reuse_port)
 
     @asyncio.coroutine
     def _pause(self):

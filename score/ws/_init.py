@@ -24,8 +24,7 @@
 # the discretion of STRG.AT GmbH also the competent court, in whose district the
 # Licensee has his registered seat, an establishment or assets.
 
-import asyncio
-from score.init import ConfiguredModule, parse_time_interval
+from score.init import ConfiguredModule, parse_time_interval, parse_bool
 from .worker import WebsocketWorker
 
 
@@ -33,6 +32,7 @@ defaults = {
     'serve.ip': '0.0.0.0',
     'serve.port': 8081,
     'stop_timeout': None,
+    'reuse_port': False,
 }
 
 
@@ -48,7 +48,8 @@ def init(confdict, ctx):
     stop_timeout = conf['stop_timeout']
     if stop_timeout is not None:
         stop_timeout = parse_time_interval(stop_timeout)
-    return ConfiguredWsModule(ctx, host, port, stop_timeout)
+    reuse_port = parse_bool(conf['reuse_port'])
+    return ConfiguredWsModule(ctx, host, port, stop_timeout, reuse_port)
 
 
 class ConfiguredWsModule(ConfiguredModule):
@@ -56,15 +57,14 @@ class ConfiguredWsModule(ConfiguredModule):
     This module's :class:`configuration class <score.init.ConfiguredModule>`.
     """
 
-    def __init__(self, ctx, host, port, stop_timeout):
+    def __init__(self, ctx, host, port, stop_timeout, reuse_port):
         import score.ws
         super().__init__(score.ws)
         self.ctx = ctx
         self.host = host
         self.port = port
         self.stop_timeout = stop_timeout
+        self.reuse_port = reuse_port
 
     def create_worker(self, handler):
-        if not asyncio.iscoroutinefunction(handler):
-            raise ValueError('Handler must be a coroutine function')
         return WebsocketWorker(self, handler)
