@@ -35,10 +35,12 @@ class WebsocketWorker(score.serve.AsyncioWorker):
 
     @asyncio.coroutine
     def _start(self):
+        extra_kwargs = {}
+        if self.conf.reuse_port:
+            extra_kwargs['reuse_port'] = True
         self.server = yield from websockets.serve(
             self.create_connection,
-            self.conf.host, self.conf.port, loop=self.loop,
-            reuse_port=self.conf.reuse_port)
+            self.conf.host, self.conf.port, loop=self.loop, **extra_kwargs)
 
     @asyncio.coroutine
     def _pause(self):
