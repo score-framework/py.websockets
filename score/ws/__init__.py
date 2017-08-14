@@ -27,7 +27,7 @@
 from ._init import init, ConfiguredWsModule
 from .worker import AsyncioWorker, TwistedAutobahnWorker, AsyncioAutobahnWorker
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 __all__ = ('init', 'ConfiguredWsModule', 'AsyncioWorker',
            'TwistedAutobahnWorker', 'AsyncioAutobahnWorker')
