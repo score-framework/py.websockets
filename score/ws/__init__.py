@@ -24,8 +24,10 @@
 # the discretion of STRG.AT GmbH also the competent court, in whose district the
 # Licensee has his registered seat, an establishment or assets.
 
-from ._init import init, ConfiguredWsModule, WebsocketWorker
+from ._init import init, ConfiguredWsModule
+from .worker import AsyncioWorker, TwistedAutobahnWorker, AsyncioAutobahnWorker
 
 __version__ = '0.0.7'
 
-__all__ = ('init', 'ConfiguredWsModule', 'WebsocketWorker')
+__all__ = ('init', 'ConfiguredWsModule', 'AsyncioWorker',
+           'TwistedAutobahnWorker', 'AsyncioAutobahnWorker')

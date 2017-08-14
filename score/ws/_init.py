@@ -25,7 +25,6 @@
 # Licensee has his registered seat, an establishment or assets.
 
 from score.init import ConfiguredModule, parse_time_interval, parse_bool
-from .worker import WebsocketWorker
 
 
 defaults = {
@@ -65,6 +64,3 @@ class ConfiguredWsModule(ConfiguredModule):
         self.port = port
         self.stop_timeout = stop_timeout
         self.reuse_port = reuse_port
-
-    def create_worker(self, handler):
-        return WebsocketWorker(self, handler)
