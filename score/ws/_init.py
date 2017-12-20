@@ -45,6 +45,8 @@ def init(confdict, ctx):
     host = conf['serve.ip']
     port = int(conf['serve.port'])
     stop_timeout = conf['stop_timeout']
+    if stop_timeout == 'None':
+        stop_timeout = None
     if stop_timeout is not None:
         stop_timeout = parse_time_interval(stop_timeout)
     reuse_port = parse_bool(conf['reuse_port'])
