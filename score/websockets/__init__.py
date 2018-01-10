@@ -25,8 +25,8 @@
 # Licensee has his registered seat, an establishment or assets.
 
 from ._init import init, ConfiguredWebsocketsModule
-from .worker import WebsocketsWorker
+from .worker import Worker
 
 __version__ = '0.1.0'
 
-__all__ = ('init', 'ConfiguredWebsocketsModule', 'WebsocketsWorker')
+__all__ = ('init', 'ConfiguredWebsocketsModule', 'Worker')

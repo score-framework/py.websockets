@@ -5,12 +5,12 @@ import asyncio
 import websockets
 
 
-class WebsocketsWorker(score.asyncio.Worker):
+class Worker(score.asyncio.Worker):
 
-    def __init__(self, websockets, asyncio, handler):
+    def __init__(self, websockets, asyncio_conf, handler):
         if not asyncio.iscoroutinefunction(handler):
             raise ValueError('Handler must be a coroutine function')
-        score.asyncio.Worker.__init__(self, asyncio)
+        score.asyncio.Worker.__init__(self, asyncio_conf)
         self.websockets = websockets
         self.handler = handler
 
