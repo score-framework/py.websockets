@@ -1,4 +1,4 @@
-# Copyright © 2015-2017 STRG.AT GmbH, Vienna, Austria
+# Copyright © 2015-2018 STRG.AT GmbH, Vienna, Austria
 #
 # This file is part of the The SCORE Framework.
 #
@@ -27,6 +27,6 @@
 from ._init import init, ConfiguredWebsocketsModule
 from .worker import WebsocketsWorker
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 __all__ = ('init', 'ConfiguredWebsocketsModule', 'WebsocketsWorker')
