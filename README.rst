@@ -1,3 +1,6 @@
+.. image:: https://raw.githubusercontent.com/score-framework/py.doc/master/docs/score-banner.png
+    :target: http://score-framework.org
+
 `The SCORE Framework`_ is a collection of harmonized python and javascript
 libraries for the development of large scale web projects. Powered by strg.at_.
 
@@ -5,12 +8,16 @@ libraries for the development of large scale web projects. Powered by strg.at_.
 .. _strg.at: http://strg.at
 
 
-score.ws
-========
+score.websockets
+================
 
-Websocket Service to use in combination with score.serve.
+Integration of the websockets_ library into The SCORE Framework.
 
-This module is a work in progress, thus currently poorly documented :-/
+The `narrative documentation of score.websockets`__ contains all the
+information you need to put this module to good use.
+
+.. _websockets: https://pypi.python.org/pypi/websockets
+__ http://www.score-framework.org/doc/python/websockets/
 
 
 License
