@@ -28,8 +28,8 @@ from score.init import ConfiguredModule, parse_time_interval, parse_bool
 
 
 defaults = {
-    'serve.ip': '0.0.0.0',
-    'serve.port': 8081,
+    'host': '0.0.0.0',
+    'port': 8081,
     'stop_timeout': None,
     'reuse_port': False,
 }
@@ -39,28 +39,49 @@ def init(confdict, ctx):
     """
     Initializes this module acoording to :ref:`our module initialization
     guidelines <module_initialization>` with the following configuration keys:
+
+    :confkey:`host` :confdefault:`0.0.0.0`
+        The hostname to listen for connnections on.
+
+    :confkey:`port` :confdefault:`8081`
+        The port to listen for connnections on.
+
+    :confkey:`stop_timeout` :confdefault:`None`
+        Defines how long the module will wait for connections to close
+        when pausing the worker. The value will be interpreted through
+        a call to :func:`score.init.parse_time_interval`.
+
+        The default value `None` indicates that the module will wait
+        indefinitely. If you want to the server to terminate immediately,
+        without waiting for open connections at all, you must pass "0".
+
+    :confkey:`reuse_port` :confdefault:`False`
+        Whether the ``reuse_port`` keyword argument should be passed to the
+        underlying event loop's :meth:`create_server()
+        <asyncio.AbstractEventLoop.create_server>` method.
+
     """
     conf = dict(defaults.items())
     conf.update(confdict)
-    host = conf['serve.ip']
-    port = int(conf['serve.port'])
+    host = conf['host']
+    port = int(conf['port'])
     stop_timeout = conf['stop_timeout']
     if stop_timeout == 'None':
         stop_timeout = None
     if stop_timeout is not None:
         stop_timeout = parse_time_interval(stop_timeout)
     reuse_port = parse_bool(conf['reuse_port'])
-    return ConfiguredWsModule(ctx, host, port, stop_timeout, reuse_port)
+    return ConfiguredWebsocketsModule(ctx, host, port, stop_timeout, reuse_port)
 
 
-class ConfiguredWsModule(ConfiguredModule):
+class ConfiguredWebsocketsModule(ConfiguredModule):
     """
     This module's :class:`configuration class <score.init.ConfiguredModule>`.
     """
 
     def __init__(self, ctx, host, port, stop_timeout, reuse_port):
-        import score.ws
-        super().__init__(score.ws)
+        import score.websockets
+        super().__init__(score.websockets)
         self.ctx = ctx
         self.host = host
         self.port = port

@@ -33,15 +33,15 @@ with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
 
 setup(
-    name='score.ws',
+    name='score.websockets',
     version='0.0.8',
-    description='HTTP handler of The SCORE Framework',
+    description='Websockets integration for The SCORE Framework',
     long_description=README,
     author='strg.at',
     author_email='score@strg.at',
     url='http://score-framework.org',
     keywords='score framework websocket',
-    packages=['score', 'score.ws'],
+    packages=['score', 'score.websockets'],
     namespace_packages=['score'],
     zip_safe=False,
     license='LGPL',
@@ -54,12 +54,12 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
     install_requires=[
         'score.ctx',
         'score.init >= 0.3',
+        'score.asyncio',
         'websockets >= 3.0',
     ]
 )
